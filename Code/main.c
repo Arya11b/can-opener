@@ -3,24 +3,94 @@
 // Alphanumeric LCD functions
 #include <alcd.h>
 
+// types
+typedef char* User;
+typedef char* Password;
+
 // Declare your global variables here
+int state = 0;
+int cursor = 0;
+
+User user;
+Password password;
+
+// states
+#define IDLE -1
+#define INIT 0
+#define LOGIN_USER 1
+#define LOGIN_PASS_INIT 2
+#define LOGIN_PASS 3
+#define LOGIN_CHECK 4
+
+// functions
+char getKey();
+
+void print(char c) {
+    lcd_gotoxy(cursor, 1);
+    lcd_putchar(c);
+    cursor++;
+}
+
+void prints(char* s) {
+    lcd_puts(s);
+}
+
+void clear() {
+    cursor = cursor > 0 ? cursor-1 : 0;
+    lcd_gotoxy(cursor, 1);
+    lcd_putchar('');
+}
 
 // External Interrupt 0 service routine
-interrupt [EXT_INT0] void ext_int0_isr(void)
-{
+interrupt [EXT_INT0] void ext_int0_isr(void) {
+    char pressedKey = '';
+    switch (state) {
+        case LOGIN_USER:
+            pressedKey = getKey();
+
+            if (pressedKey == '#') {
+                state = LOGIN_PASS_INIT;
+            }else if (pressedKey == '*') {
+                clear();
+            }else{
+                user[cursor] = pressedKey;
+                print(pressedKey);
+            }
+            break;
+
+        case LOGIN_PASS:
+            pressedKey = getKey();
+
+            if (pressedKey == '#') {
+                state = LOGIN_CHECK;
+            }else if (pressedKey == '*') {
+                clear();
+            }else{
+                password[cursor] = pressedKey;
+                print('*');
+            }
+
+            break;
+    }
+
+}
+
+char getKey() {
+    char pressedKey = '';
+
     PORTC.0 = 0;
     PORTC.1 = 1;
     PORTC.2 = 1;
 
     if (PINC.0 == 0) {
         if (PINC.3 == 0) {
-            lcd_puts("1");
+            pressedKey = '1';
         }else if (PINC.4 == 0) {
-            lcd_puts("4");
+            pressedKey = '4';
         }else if (PINC.5 == 0) {
-            lcd_puts("7");
+            pressedKey = '7';
         }else if (PINC.6 == 0) {
-            lcd_puts("*");
+            pressedKey = '*';
         }
     }
 
@@ -30,13 +100,13 @@ interrupt [EXT_INT0] void ext_int0_isr(void)
 
     if (PINC.1 == 0) {
         if (PINC.3 == 0) {
-            lcd_puts("2");
+            pressedKey = '2';
         }else if (PINC.4 == 0) {
-            lcd_puts("5");
+            pressedKey = '5';
         }else if (PINC.5 == 0) {
-            lcd_puts("8");
+            pressedKey = '8';
         }else if (PINC.6 == 0) {
-            lcd_puts("0");
+            pressedKey = '0';
         }
     }
 
@@ -46,19 +116,21 @@ interrupt [EXT_INT0] void ext_int0_isr(void)
 
     if (PINC.2 == 0) {
         if (PINC.3 == 0) {
-            lcd_puts("3");
+            pressedKey = '3';
         }else if (PINC.4 == 0) {
-            lcd_puts("6");
+            pressedKey = '6';
         }else if (PINC.5 == 0) {
-            lcd_puts("9");
+            pressedKey = '9';
         }else if (PINC.6 == 0) {
-            lcd_puts("#");
+            pressedKey = '#';
         }
     }
 
     PORTC.0 = 0;
     PORTC.1 = 0;
     PORTC.2 = 0;
+
+    return pressedKey;
 }
 
 void main(void)
@@ -186,9 +258,25 @@ void main(void)
     // Global enable interrupts
     #asm("sei")
 
-    while (1)
-    {
-        // Place your code here
+    while (1) {
 
+        switch (state) {
+            case IDLE:
+                break;
+            case INIT:
+                lcd_clear();
+                lcd_puts("user id: ");
+                lcd_gotoxy(0, 1);
+                state = LOGIN_USER;
+                break;
+
+            case LOGIN_PASS_INIT:
+                lcd_clear();
+                lcd_puts("password: ");
+                lcd_gotoxy(0, 1);
+                state = LOGIN_PASS;
+                cursor = 0;
+                break;
+        }
     }
 }
