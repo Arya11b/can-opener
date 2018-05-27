@@ -1,0 +1,5 @@
+VERSION:3 SOURCE_TIMESTAMP:4CBB7492
+NODE:I LEVEL:0 LINE:1 "F:\cvavr\inc\mega16.h"
+NODE:I LEVEL:0 LINE:4 "F:\cvavr\inc\alcd.h"
+NODE:F LEVEL:0 LINE:9 "ext_int0_isr(void)"
+NODE:F LEVEL:0 LINE:65 "main(void)"
