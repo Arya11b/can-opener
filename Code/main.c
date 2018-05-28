@@ -7,13 +7,6 @@
 typedef char* User;
 typedef char* Password;
 
-// Declare your global variables here
-int state = 0;
-int cursor = 0;
-
-User user;
-Password password;
-
 // states
 #define IDLE -1
 #define INIT 0
@@ -21,6 +14,25 @@ Password password;
 #define LOGIN_PASS_INIT 2
 #define LOGIN_PASS 3
 #define LOGIN_CHECK 4
+#define ADMIN_MENU 5
+#define ADMIN_CHECK 6
+#define ADMIN_ADD 7
+#define ADMIN_ADD_CHECK 8
+#define ADMIN_DEL 9
+#define ADMIN_DEL_CHECK 10
+#define ADMIN_CNT 11
+#define ADMIN_CNT_CHECK 12
+#define DOOR_OPEN 20
+
+
+// Declare your global variables here
+int state = ADMIN_MENU;
+int cursor = 0;
+int access = 1;
+
+User user;
+Password password;
+
 
 // functions
 char getKey();
@@ -69,7 +81,46 @@ interrupt [EXT_INT0] void ext_int0_isr(void) {
                 password[cursor] = pressedKey;
                 print('*');
             }
+            break;
+        case ADMIN_CHECK:
+            pressedKey = getKey();
 
+            if (pressedKey == '0') {
+                state = DOOR_OPEN;
+            }else if (pressedKey == '1') {
+                state = ADMIN_ADD;
+            }else if (pressedKey == '2'){
+                state = ADMIN_DEL;
+            }else if (pressedKey == '3'){
+                state = ADMIN_CNT;
+            }else{
+              // possible error message
+              // delay library needs to be added
+              state = ADMIN_MENU;
+            }
+            break;
+        case ADMIN_CNT_CHECK:
+            pressedKey = getKey();
+
+            if (pressedKey == '0') {
+                access = 0;
+                // possible acknowledge message
+                state = ADMIN_MENU;
+            }else if (pressedKey == '1'){
+                access = 1;
+                // possible acknowledge message
+                state = ADMIN_MENU;
+            }else if (pressedKey == '2') {
+                access = 2;
+                // possible acknowledge message
+                state = ADMIN_MENU;
+            }else if (pressedKey == '*'){
+              state = ADMIN_MENU;
+            }else{
+              // possible error message
+              // delay library needs to be added
+              state = ADMIN_MENU;
+            }
             break;
     }
 
@@ -152,7 +203,7 @@ void main(void)
 
     // Port C initialization
     // Function: Bit7=In Bit6=In Bit5=In Bit4=In Bit3=In Bit2=In Bit1=In Bit0=In
-    DDRC=(0<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (0<<DDC3) | (1<<DDC2) | (1<<DDC1) | (1<<DDC0);
+    DDRC=(1<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (0<<DDC3) | (1<<DDC2) | (1<<DDC1) | (1<<DDC0);
     // State: Bit7=T Bit6=T Bit5=T Bit4=T Bit3=T Bit2=T Bit1=T Bit0=T
     PORTC=(0<<PORTC7) | (1<<PORTC6) | (1<<PORTC5) | (1<<PORTC4) | (1<<PORTC3) | (0<<PORTC2) | (0<<PORTC1) | (0<<PORTC0);
 
@@ -264,6 +315,7 @@ void main(void)
             case IDLE:
                 break;
             case INIT:
+                PORTC.7 = 0;
                 lcd_clear();
                 lcd_puts("user id: ");
                 lcd_gotoxy(0, 1);
@@ -276,6 +328,44 @@ void main(void)
                 lcd_gotoxy(0, 1);
                 state = LOGIN_PASS;
                 cursor = 0;
+                break;
+            case ADMIN_MENU:
+                lcd_clear();
+                lcd_puts("0 open");
+                lcd_gotoxy(6,0);
+                lcd_puts("1 add user");
+                lcd_gotoxy(0,1);
+                lcd_puts("2 del user");
+                lcd_gotoxy(8,1);
+                lcd_puts("3 access");
+                state = ADMIN_CHECK;
+                break;
+            case ADMIN_ADD:
+                lcd_clear();
+                lcd_gotoxy(0,0);
+                lcd_puts("enter user id:");
+                state = ADMIN_ADD_CHECK;
+                break;
+            case ADMIN_DEL:
+                lcd_clear();
+                lcd_gotoxy(0,0);
+                lcd_puts("enter user id:");
+                state = ADMIN_DEL_CHECK;
+                break;
+            case ADMIN_CNT:
+                lcd_clear();
+                lcd_puts("0 public");
+                lcd_gotoxy(8,0);
+                lcd_puts("1 users only");
+                lcd_gotoxy(0,1);
+                lcd_puts("2 noone");
+                lcd_gotoxy(8,1);
+                lcd_puts("* back");
+                state = ADMIN_CNT_CHECK;
+                break;
+            case DOOR_OPEN:
+                PORTC.7 = 1;
+                state = IDLE;
                 break;
         }
     }
