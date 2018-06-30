@@ -31,7 +31,7 @@ Active0=0
 EditorPanel0=0
 PageIndex0=0
 EditorPanel1=0
-TimeStamp1=1287532201
+TimeStamp1=1287555817
 PageIndex1=1
 >>>>>>> - bugs fixed
 [CompilerDebug]
@@ -453,14 +453,14 @@ BK9=-1
 Blocks=0
 [Bookmarks2]
 <<<<<<< HEAD
-TimeStamp=1287532201
+TimeStamp=1287555817
 =======
 TimeStamp=1287470136
 >>>>>>> - bugs fixed
-Row=84
-Column=19
+Row=0
+Column=0
 ScrollPosX=0
-ScrollPosY=62
+ScrollPosY=0
 BK0=-1
 BK1=-1
 BK2=-1
@@ -478,7 +478,7 @@ Row=0
 Column=0
 ScrollPosX=0
 ScrollPosY=0
-TimeStamp=1287532395
+TimeStamp=1287824276
 >>>>>>> - bugs fixed
 [HeadersList]
 Files=1
